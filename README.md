@@ -59,3 +59,9 @@ A single platform linking road-safety authorities, tracking hazardous-materials 
 ## الترخيص / License
 
 MIT. See `LICENSE`.
+
+## Related project / مشروع مرتبط
+
+[SCaaS: Software Components as a Service](https://github.com/ebtessm/scaas): a research idea for a national-cloud platform where reusable components (such as this project's risk scoring) could be shared. Idea stage only.
+
+[SCaaS](https://github.com/ebtessm/scaas): فكرة بحثية لمنصة على سحابة وطنية تُشارَك فيها المكوّنات القابلة لإعادة الاستخدام (مثل تقييم المخاطر هنا). مرحلة فكرة فقط.
