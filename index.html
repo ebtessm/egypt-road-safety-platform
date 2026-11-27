@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>عرض تجريبي: منصة السلامة على الطرق ونقل المواد الخطرة</title>
+<style>
+body{font-family:Tahoma,Arial,sans-serif;margin:0;background:#f3f5f7;color:#1c2733}
+header{background:#14385c;color:#fff;padding:16px 20px}
+header h1{margin:0;font-size:20px} header p{margin:6px 0 0;font-size:14px;opacity:.9}
+.banner{background:#fff3cd;border-bottom:2px solid #e0a800;padding:10px 20px;font-size:14px;font-weight:bold}
+main{padding:16px 20px;max-width:1100px;margin:auto}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.stat{background:#fff;border-radius:8px;padding:10px 16px;flex:1;min-width:110px;text-align:center;box-shadow:0 1px 3px #0002}
+.stat b{display:block;font-size:24px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border-radius:8px;padding:12px;box-shadow:0 1px 3px #0002}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 6px;text-align:right;border-bottom:1px solid #e5e8eb}
+tr.sel{background:#e8f0fa} tbody tr{cursor:pointer}
+.badge{padding:2px 10px;border-radius:12px;color:#fff;font-size:13px;white-space:nowrap}
+.low{background:#2e9d57}.medium{background:#d9a300}.high{background:#e8741a}.critical{background:#c62828}
+.alert{border-right:5px solid;padding:8px 10px;margin:8px 0;background:#fafafa;border-radius:4px;font-size:14px}
+.alert.critical{border-color:#c62828}.alert.high{border-color:#e8741a}.alert.medium{border-color:#d9a300}
+.alert ul{margin:4px 0 0;padding-right:18px}
+svg{width:100%;height:320px;background:#eaf1e6;border-radius:6px}
+footer{padding:16px 20px;font-size:13px;color:#555;text-align:center}
+a{color:#14385c}
+</style>
+</head>
+<body>
+<header>
+<h1>منصة وطنية للسلامة على الطرق ونقل المواد الخطرة (نموذج أولي)</h1>
+<p>لوحة عرض توضح الفكرة: تتبع الشحنات، درجة الخطورة، والتنبيهات المبكرة</p>
+</header>
+<div class="banner">⚠️ عرض تجريبي فقط: كل الشحنات والأماكن والأرقام هنا بيانات وهمية. هذا ليس نظامًا حقيقيًا وليس مشروعًا حكوميًا رسميًا.</div>
+<main>
+<div class="stats" id="stats"></div>
+<div class="grid">
+<div class="card"><h3>الشحنات (بيانات وهمية)</h3>
+<table><thead><tr><th>الرقم</th><th>السرعة</th><th>الدرجة</th><th>المستوى</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div class="card"><h3>الخريطة التخطيطية (ليست خريطة حقيقية)</h3><svg id="map" viewBox="0 0 400 320"></svg>
+<small>الخط المتقطع: المسار المخطط. الدائرة: الموقع الحالي.</small></div>
+</div>
+<div class="card" style="margin-top:14px"><h3>التنبيهات</h3><div id="alerts"></div></div>
+</main>
+<footer>الكود المفتوح (MIT) ومنطق حساب الخطورة نفسه موجود في المستودع:
+<a href="https://github.com/ebtessm/egypt-road-safety-platform">github.com/ebtessm/egypt-road-safety-platform</a><br>
+الأوزان والحدود توضيحية وتحتاج مراجعة خبراء الجهات المختصة.</footer>
+<script>
+const data=[
+{id:"SYN-001",route:[[30.05,31.20],[30.10,31.25],[30.15,31.30]],limit:70,hours:3,insp:true,wx:false,pos:{lat:30.10,lon:31.25,speed:62,stop:0}},
+{id:"SYN-002",route:[[30.05,31.20],[30.10,31.25],[30.15,31.30]],limit:70,hours:10,insp:false,wx:true,pos:{lat:30.30,lon:31.50,speed:95,stop:25}},
+{id:"SYN-003",route:[[30.05,31.20],[30.10,31.25],[30.15,31.30]],limit:70,hours:9,insp:true,wx:false,pos:{lat:30.12,lon:31.27,speed:78,stop:0}},
+{id:"SYN-004",route:[[30.05,31.20],[30.10,31.25],[30.15,31.30]],limit:70,hours:5,insp:true,wx:true,pos:{lat:30.14,lon:31.29,speed:55,stop:30}},
+{id:"SYN-005",route:[[30.05,31.20],[30.10,31.25],[30.15,31.30]],limit:70,hours:2,insp:true,wx:false,pos:{lat:30.06,lon:31.21,speed:68,stop:0}}];
+function dist(a,b){const r=x=>x*Math.PI/180,la=r(a[0]),lb=r(b[0]),h=Math.sin((lb-la)/2)**2+Math.cos(la)*Math.cos(lb)*Math.sin(r(b[1]-a[1])/2)**2;return 2*6371*Math.asin(Math.sqrt(h));}
+function assess(s){let sc=0,re=[];const p=s.pos,over=p.speed-s.limit;
+if(over>0){sc+=Math.min(40,Math.floor(over*2));re.push("سرعة أعلى من الحد المسموح بـ "+Math.round(over)+" كم/س");}
+const dev=Math.min(...s.route.map(q=>dist([p.lat,p.lon],q)));
+if(dev>1){sc+=25;re.push("خروج عن المسار المخطط بمسافة "+dev.toFixed(1)+" كم");}
+if(p.stop>20){sc+=15;re.push("توقف غير معتاد "+Math.round(p.stop)+" دقيقة");}
+if(s.hours>8){sc+=20;re.push("ساعات قيادة طويلة ("+s.hours.toFixed(1)+" ساعة)");}
+if(!s.insp){sc+=30;re.push("فحص المركبة منتهٍ");}
+if(s.wx){sc+=10;re.push("طقس سيئ");}
+return {score:Math.min(sc,100),reasons:re};}
+function level(n){return n>=70?"critical":n>=45?"high":n>=20?"medium":"low";}
+const names={low:"منخفض",medium:"متوسط",high:"مرتفع",critical:"حرج"};
+const res=data.map(s=>({s,r:assess(s)}));
+res.forEach(x=>x.l=level(x.r.score));
+let sel=0;
+function render(){
+const c={low:0,medium:0,high:0,critical:0};res.forEach(x=>c[x.l]++);
+document.getElementById("stats").innerHTML='<div class="stat"><b>'+res.length+'</b>شحنات</div>'+["critical","high","medium","low"].map(k=>'<div class="stat"><b>'+c[k]+'</b>'+names[k]+'</div>').join("");
+document.getElementById("rows").innerHTML=res.map((x,i)=>'<tr class="'+(i==sel?"sel":"")+'" onclick="sel='+i+';render()"><td>'+x.s.id+'</td><td>'+x.s.pos.speed+' كم/س</td><td>'+x.r.score+'</td><td><span class="badge '+x.l+'">'+names[x.l]+'</span></td></tr>').join("");
+const al=res.filter(x=>x.l!="low").sort((a,b)=>b.r.score-a.r.score);
+document.getElementById("alerts").innerHTML=al.map(x=>'<div class="alert '+x.l+'"><b>'+x.s.id+'</b> <span class="badge '+x.l+'">'+names[x.l]+' ('+x.r.score+')</span><ul>'+x.r.reasons.map(t=>'<li>'+t+'</li>').join("")+'</ul></div>').join("")||"لا توجد تنبيهات";
+const X=lon=>20+(lon-31.15)*(360/0.45),Y=lat=>300-(lat-30.0)*(280/0.4);
+const rt=data[0].route;
+let svg='<polyline fill="none" stroke="#14385c" stroke-width="3" stroke-dasharray="8 6" points="'+rt.map(q=>X(q[1])+","+Y(q[0])).join(" ")+'"/>';
+res.forEach((x,i)=>{const col={low:"#2e9d57",medium:"#d9a300",high:"#e8741a",critical:"#c62828"}[x.l];
+svg+='<circle cx="'+X(x.s.pos.lon)+'" cy="'+Y(x.s.pos.lat)+'" r="'+(i==sel?12:8)+'" fill="'+col+'" stroke="#fff" stroke-width="2"/><text x="'+(X(x.s.pos.lon)+12)+'" y="'+(Y(x.s.pos.lat)-8)+'" font-size="11" direction="ltr">'+x.s.id+'</text>';});
+document.getElementById("map").innerHTML=svg;}
+render();
+</script>
+</body>
+</html>
