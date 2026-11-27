@@ -1,0 +1,8 @@
+[
+  {"id": "SYN-001", "planned_route": [[30.05, 31.20], [30.10, 31.25], [30.15, 31.30]],
+   "speed_limit_kmh": 70, "hours_driven_today": 3, "inspection_valid": true, "bad_weather": false,
+   "position": {"lat": 30.10, "lon": 31.25, "speed_kmh": 62, "stopped_minutes": 0}},
+  {"id": "SYN-002", "planned_route": [[30.05, 31.20], [30.10, 31.25], [30.15, 31.30]],
+   "speed_limit_kmh": 70, "hours_driven_today": 10, "inspection_valid": false, "bad_weather": true,
+   "position": {"lat": 30.30, "lon": 31.50, "speed_kmh": 95, "stopped_minutes": 25}}
+]
